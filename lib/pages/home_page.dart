@@ -26,13 +26,13 @@ class _HomePageState extends State<HomePage> {
         return const NotesPage();
       }),
       bottomNavigationBar: BottomNavigationBar(
-        backgroundColor: Color.fromARGB(255, 255, 102, 0),
+        backgroundColor: Colors.black,
         items: const [
           BottomNavigationBarItem(
             icon: Icon(
               Icons.timelapse_outlined,
               size: 35,
-              color: Colors.black,
+              color: Color.fromARGB(255, 255, 102, 0),
             ),
             label: '',
           ),
@@ -40,7 +40,7 @@ class _HomePageState extends State<HomePage> {
             icon: Icon(
               Icons.note,
               size: 35,
-              color: Colors.black,
+              color: Color.fromARGB(255, 255, 102, 0),
             ),
             label: '',
           ),
