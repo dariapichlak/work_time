@@ -1,24 +1,98 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
+import 'package:intl/intl.dart';
 
-class TimerPage extends StatelessWidget {
+class TimerPage extends StatefulWidget {
   const TimerPage({
     Key? key,
   }) : super(key: key);
 
   @override
+  State<TimerPage> createState() => _TimerPageState();
+}
+
+class _TimerPageState extends State<TimerPage> {
+  Duration duration = const Duration();
+  Timer? timer;
+  bool isCountdown = false;
+  static const countdownDuration = Duration(seconds: 10);
+  // List laps = [];
+
+  @override
+  void initState() {
+    super.initState();
+
+    reset();
+  }
+
+  // void addLaps() {
+  //   String lap = '$duration';
+  //   setState(() {
+  //     laps.add(lap);
+  //   });
+  // }
+
+  void reset() {
+    if (isCountdown) {
+      setState(() {
+        duration = countdownDuration;
+      });
+    } else {
+      setState(() {
+        duration = const Duration();
+      });
+    }
+  }
+
+  void startTimer() {
+    timer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      addTime();
+    });
+  }
+
+  void addTime() {
+    final addSeconds = 1;
+    setState(() {
+      final seconds = duration.inSeconds + addSeconds;
+      duration = Duration(seconds: seconds);
+    });
+  }
+
+  void stopTimer({bool resets = true}) {
+    if (resets) {
+      reset();
+    }
+    setState(() {
+      timer?.cancel();
+    });
+  }
+
+  @override
   Widget build(BuildContext context) {
+    String twoDigits(int n) => n.toString().padLeft(2, '0');
+    final minutes = twoDigits(duration.inMinutes.remainder(60));
+    final seconds = twoDigits(duration.inSeconds.remainder(60));
+    final hours = twoDigits(duration.inHours);
+    // final currentTime = DateFormat.yMMMd().format(DateTime.now()).toString();
+
     return Scaffold(
       appBar: AppBar(
-        backgroundColor: const Color.fromARGB(255, 65, 65, 65),
+        backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: IconButton(
-          icon: const Icon(
-            Icons.circle,
-            color: Colors.transparent,
-            size: 30,
+        leading: Padding(
+          padding: const EdgeInsets.only(left: 15.0),
+          child: IconButton(
+            icon: const Icon(
+              Icons.restart_alt_outlined,
+              color: Color.fromARGB(255, 255, 102, 0),
+              size: 35,
+            ),
+            onPressed: () {
+              stopTimer();
+            },
           ),
-          onPressed: () {},
         ),
         actions: [
           Padding(
@@ -26,9 +100,11 @@ class TimerPage extends StatelessWidget {
               right: 15.0,
             ),
             child: IconButton(
-                onPressed: () {},
+                onPressed: () {
+                  // addLaps();
+                },
                 icon: const Icon(
-                  Icons.restart_alt_outlined,
+                  Icons.save_alt_outlined,
                   color: Color.fromARGB(255, 255, 102, 0),
                   size: 35,
                 )),
@@ -84,22 +160,19 @@ class TimerPage extends StatelessWidget {
                   borderRadius: BorderRadius.circular(130),
                 ),
                 child: Center(
-                  child: InkWell(
-                    onTap: () {},
-                    child: Container(
-                      width: 240,
-                      height: 240,
-                      decoration: BoxDecoration(
-                        color: Colors.black,
-                        borderRadius: BorderRadius.circular(120),
-                      ),
-                      child: const Center(
-                        child: Text(
-                          '00:00',
-                          style: TextStyle(
-                            color: Colors.white,
-                            fontSize: 70,
-                          ),
+                  child: Container(
+                    width: 240,
+                    height: 240,
+                    decoration: BoxDecoration(
+                      color: Colors.black,
+                      borderRadius: BorderRadius.circular(120),
+                    ),
+                    child: Center(
+                      child: Text(
+                        '$hours:$minutes:$seconds',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 50,
                         ),
                       ),
                     ),
@@ -117,11 +190,42 @@ class TimerPage extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               crossAxisAlignment: CrossAxisAlignment.center,
               children: [
-                InkWell(onTap: () {}, child: const BottomTime('START')),
-                InkWell(onTap: () {}, child: const BottomTime('STOP')),
+                InkWell(
+                    onTap: () {
+                      startTimer();
+                    },
+                    child: const BottomTime('START')),
+                InkWell(
+                    onTap: () {
+                      stopTimer(resets: false);
+                    },
+                    child: const BottomTime('STOP')),
               ],
             ),
           ),
+          const SizedBox(
+            height: 10,
+          ),
+          // Container(
+          //     color: Colors.transparent,
+          //     height: 100,
+          //     child: ListView.builder(
+          //       itemCount: laps.length,
+          //       itemBuilder: (context, index) {
+          //         return Padding(
+          //           padding: const EdgeInsets.all(16),
+          //           child: Row(
+          //             children: [
+          //               Text(currentTime),
+          //               const SizedBox(
+          //                 width: 20,
+          //               ),
+          //               Text('${laps[index]}'),
+          //             ],
+          //           ),
+          //         );
+          //       },
+          //     )),
         ],
       ),
     );
