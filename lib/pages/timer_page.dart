@@ -18,7 +18,6 @@ class _TimerPageState extends State<TimerPage> {
   Timer? timer;
   bool isCountdown = false;
   static const countdownDuration = Duration(seconds: 10);
-  // List laps = [];
 
   @override
   void initState() {
@@ -26,13 +25,6 @@ class _TimerPageState extends State<TimerPage> {
 
     reset();
   }
-
-  // void addLaps() {
-  //   String lap = '$duration';
-  //   setState(() {
-  //     laps.add(lap);
-  //   });
-  // }
 
   void reset() {
     if (isCountdown) {
@@ -53,9 +45,8 @@ class _TimerPageState extends State<TimerPage> {
   }
 
   void addTime() {
-    final addSeconds = 1;
     setState(() {
-      final seconds = duration.inSeconds + addSeconds;
+      final seconds = duration.inSeconds + 1;
       duration = Duration(seconds: seconds);
     });
   }
@@ -75,7 +66,6 @@ class _TimerPageState extends State<TimerPage> {
     final minutes = twoDigits(duration.inMinutes.remainder(60));
     final seconds = twoDigits(duration.inSeconds.remainder(60));
     final hours = twoDigits(duration.inHours);
-    // final currentTime = DateFormat.yMMMd().format(DateTime.now()).toString();
 
     return Scaffold(
       appBar: AppBar(
@@ -100,12 +90,10 @@ class _TimerPageState extends State<TimerPage> {
               right: 15.0,
             ),
             child: IconButton(
-                onPressed: () {
-                  // addLaps();
-                },
+                onPressed: () {},
                 icon: const Icon(
                   Icons.save_alt_outlined,
-                  color: Color.fromARGB(255, 255, 102, 0),
+                  color: Colors.transparent,
                   size: 35,
                 )),
           )
@@ -186,49 +174,35 @@ class _TimerPageState extends State<TimerPage> {
           ),
           Padding(
             padding: const EdgeInsets.symmetric(horizontal: 60.0),
-            child: Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              crossAxisAlignment: CrossAxisAlignment.center,
-              children: [
-                InkWell(
-                    onTap: () {
-                      startTimer();
-                    },
-                    child: const BottomTime('START')),
-                InkWell(
-                    onTap: () {
-                      stopTimer(resets: false);
-                    },
-                    child: const BottomTime('STOP')),
-              ],
-            ),
+            child: buttonStartStop(),
           ),
           const SizedBox(
             height: 10,
           ),
-          // Container(
-          //     color: Colors.transparent,
-          //     height: 100,
-          //     child: ListView.builder(
-          //       itemCount: laps.length,
-          //       itemBuilder: (context, index) {
-          //         return Padding(
-          //           padding: const EdgeInsets.all(16),
-          //           child: Row(
-          //             children: [
-          //               Text(currentTime),
-          //               const SizedBox(
-          //                 width: 20,
-          //               ),
-          //               Text('${laps[index]}'),
-          //             ],
-          //           ),
-          //         );
-          //       },
-          //     )),
         ],
       ),
     );
+  }
+
+  Widget buttonStartStop() {
+    final isRunning = timer == null ? false : timer!.isActive;
+    final isCompleted = duration.inSeconds == 0;
+
+    return isRunning || !isCompleted
+        ? InkWell(
+            onTap: () {
+              if (isRunning) {
+                stopTimer(resets: false);
+              } else {
+                startTimer();
+              }
+            },
+            child: BottomTime(isRunning ? 'STOP' : 'START'))
+        : InkWell(
+            onTap: () {
+              startTimer();
+            },
+            child: const BottomTime('START'));
   }
 }
 
