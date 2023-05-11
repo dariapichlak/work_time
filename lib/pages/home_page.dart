@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:work_time/pages/notes_page.dart';
 import 'package:work_time/pages/timer_page.dart';
+import 'package:intl/intl.dart';
 
 class HomePage extends StatefulWidget {
   const HomePage({

@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 import 'package:work_time/sql_helper/sql_helper.dart';
+import 'package:intl/intl.dart';
 
 class NotesPage extends StatefulWidget {
   const NotesPage({
@@ -22,6 +23,35 @@ class _NotesPageState extends State<NotesPage> {
       _journals = data;
       _isLoading = false;
     });
+  }
+
+  DateTime _dateTime = DateTime.now();
+  _selectedDate(BuildContext context) async {
+    var _pickedDate = await showDatePicker(
+      context: context,
+      initialDate: DateTime.now(),
+      firstDate: DateTime(2022),
+      lastDate: DateTime.now().add(
+        const Duration(days: 365 * 10),
+      ),
+      builder: (context, child) => Theme(
+        data: ThemeData().copyWith(
+            colorScheme: const ColorScheme.dark(
+              primary: Colors.orange,
+              onPrimary: Colors.white,
+              surface: Colors.black,
+            ),
+            dialogBackgroundColor: Colors.black),
+        child: child!,
+      ),
+    );
+
+    if (_pickedDate != null) {
+      setState(() {
+        _dateTime = _pickedDate;
+        _dateController.text = DateFormat('yyyy-MM-dd').format(_pickedDate);
+      });
+    }
   }
 
   @override
@@ -58,7 +88,15 @@ class _NotesPageState extends State<NotesPage> {
                 children: [
                   TextField(
                     controller: _dateController,
-                    decoration: const InputDecoration(hintText: 'Date'),
+                    decoration: InputDecoration(
+                      hintText: 'Date',
+                      prefixIcon: InkWell(
+                        onTap: () {
+                          _selectedDate(context);
+                        },
+                        child: const Icon(Icons.calendar_today_outlined),
+                      ),
+                    ),
                   ),
                   const SizedBox(
                     height: 10,
@@ -71,6 +109,8 @@ class _NotesPageState extends State<NotesPage> {
                     height: 20,
                   ),
                   ElevatedButton(
+                    style:
+                        ElevatedButton.styleFrom(backgroundColor: Colors.black),
                     onPressed: () async {
                       if (id == null) {
                         await _addItem();
@@ -95,6 +135,8 @@ class _NotesPageState extends State<NotesPage> {
     await SQLHelper.deleteItem(id);
 
     _refreshJournals();
+
+    Navigator.pop(context, 'Yes');
   }
 
   @override
@@ -141,35 +183,82 @@ class _NotesPageState extends State<NotesPage> {
       body: _isLoading
           ? const Center(
               child: CircularProgressIndicator(
-                color: Colors.orange,
+                color: Color.fromARGB(255, 255, 102, 0),
               ),
             )
           : ListView.builder(
               itemCount: _journals.length,
               itemBuilder: (context, index) => Card(
-                color: Colors.black,
-                margin: const EdgeInsets.all(15),
-                child: ListTile(
-                    title: Text(_journals[index]['date']),
-                    subtitle: Text(_journals[index]['worktime']),
-                    trailing: SizedBox(
-                      width: 100,
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            icon: const Icon(Icons.delete),
-                            onPressed: () =>
-                                _deleteItem(_journals[index]['id']),
-                          ),
-                        ],
-                      ),
-                    )),
-              ),
+                  color: Colors.black,
+                  margin: const EdgeInsets.all(20),
+                  child: Padding(
+                    padding: const EdgeInsets.symmetric(
+                        horizontal: 25.0, vertical: 10),
+                    child: Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          _journals[index]['date'],
+                          style: const TextStyle(fontSize: 18),
+                        ),
+                        Text(
+                          _journals[index]['worktime'],
+                          style:
+                              const TextStyle(fontSize: 20, color: Colors.grey),
+                        ),
+                        IconButton(
+                            icon: const Icon(
+                              Icons.delete,
+                              size: 22,
+                            ),
+                            onPressed: () {
+                              showDialog(
+                                  context: context,
+                                  builder: (_) => AlertDialog(
+                                        elevation: 10,
+                                        title: const Text('Delete?',
+                                            style: TextStyle(
+                                              color: Colors.white,
+                                              fontSize: 25,
+                                            )),
+                                        actions: [
+                                          TextButton(
+                                              onPressed: () =>
+                                                  Navigator.pop(context, 'No'),
+                                              child: const Text(
+                                                'No',
+                                                style: TextStyle(
+                                                  color: Color.fromARGB(
+                                                      255, 255, 102, 0),
+                                                  fontSize: 20,
+                                                ),
+                                              )),
+                                          const SizedBox(
+                                            width: 65,
+                                          ),
+                                          TextButton(
+                                              onPressed: () => _deleteItem(
+                                                  _journals[index]['id']),
+                                              child: const Text('Yes',
+                                                  style: TextStyle(
+                                                    color: Color.fromARGB(
+                                                        255, 255, 102, 0),
+                                                    fontSize: 20,
+                                                  ))),
+                                        ],
+                                      ));
+                            }),
+                      ],
+                    ),
+                  )),
             ),
       floatingActionButton: FloatingActionButton(
-        backgroundColor: Colors.orange,
-        child: const Icon(Icons.add),
+        backgroundColor: Colors.black,
+        child: const Icon(
+          Icons.edit,
+          color: Colors.white,
+          size: 27,
+        ),
         onPressed: () => _showForm(null),
       ),
     );
